@@ -1,3 +1,5 @@
+%include "linux64.inc"
+
 section .text
 extern set_validation_bit
 extern set_tag
@@ -5,18 +7,17 @@ extern get_data
 extern display_table
 extern get_validation_bit
 extern get_tag
-
 global _start
 global handle_addr
 _start:    
+  mov rbp, rsp
+
   xor rax, rax
   xor rcx, rcx
 
   ; discards argc and prog name.
   pop rbx
-  pop rsi 
-  
-  mov rbp, rsp
+  ; pop rsi 
    
   ; since prog name is discarded, must deduct one from argc.
   dec rbx
@@ -27,13 +28,14 @@ _start:
     jmp next
 
   ciclo:
-    mov rdi, [rbp + 8*rcx] 
+    pop rdi
+    printVal rdi
     call handle_addr
     inc rcx
     jmp for
 
   next:
-    call display_table
+    ;; call display_table
  
 fim:
   mov rax, 60
