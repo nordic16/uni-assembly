@@ -12,30 +12,55 @@ global handle_addr
 _start:    
   mov rbp, rsp
 
-  xor rax, rax
   xor rcx, rcx
 
   ; discards argc and prog name.
-  pop rcx
+  pop rbx
   pop rsi 
-   
-  ; since prog name is discarded, must deduct one from argc.
-  dec rcx
 
-  cmp rcx, 0
-  ; je erro
+  ; since prog name is discarded, must deduct one from argc.
+  dec rbx
 
   for:
-    mov rax, [rsp + 8*(rcx - 1)]
-    mov rdi, [rax] ; deref 
-    call handle_addr
+    cmp rcx, rbx
+    jb ciclo
+    je fim
     
-  loop for
+    ciclo: 
+      mov rax, [rsp + 8*rcx]
+      mov rdi, [rax] ; deref 
+      call handle_addr
 
-  next:
-    ;; call display_table
- 
+      push rcx
+      ; prepares get_validation_bit call.
+      mov rdi, r9
+      call get_validation_bit
+
+      cmp rax, 0
+      je is_zero
+      jmp not_zero
+
+      is_zero:  
+        ; note: rdi and rcx get changed after most function calls      
+        mov rdi, r9
+        call set_validation_bit
+
+        mov rdi, r9
+        mov rsi, r8
+        call set_tag
+
+        jmp continue
+      
+      not_zero:
+        ; ....
+
+      continue:
+        pop rcx
+        inc rcx
+        jmp for
+
 fim:
+  call display_table
   mov rax, 60
   xor rdi, rdi
   syscall
