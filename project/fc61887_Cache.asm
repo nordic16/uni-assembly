@@ -1,5 +1,3 @@
-%include "linux64.inc"
-
 section .text
 extern set_validation_bit
 extern set_tag
@@ -9,9 +7,9 @@ extern get_validation_bit
 extern get_tag
 global _start
 global handle_addr
+global get_data_func
 _start:    
   mov rbp, rsp
-
   xor rcx, rcx
 
   ; discards argc and prog name.
@@ -49,10 +47,29 @@ _start:
         mov rsi, r8
         call set_tag
 
+        call get_data_func
+
         jmp continue
       
       not_zero:
-        ; ....
+        mov rdi, r9
+        call get_tag 
+        
+        cmp rax, r9
+        jne not_equal
+        jmp next
+
+        ; in case tags don't match, set new tag.
+        not_equal:
+          mov rdi, r9
+          mov rsi, r8 
+          call set_tag
+          jmp next
+
+        next:
+          call get_data_func
+          jmp continue 
+         
 
       continue:
         pop rcx
@@ -64,6 +81,14 @@ fim:
   mov rax, 60
   xor rdi, rdi
   syscall
+
+
+; this only exists to make code less repetitive.
+get_data_func:
+  mov rdi, r9
+  mov rsi, r10 
+  call get_data
+  ret
 
 ; handles each address accordingly.
 handle_addr:
