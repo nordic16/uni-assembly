@@ -16,23 +16,21 @@ _start:
   xor rcx, rcx
 
   ; discards argc and prog name.
-  pop rbx
-  ; pop rsi 
+  pop rcx
+  pop rsi 
    
   ; since prog name is discarded, must deduct one from argc.
-  dec rbx
+  dec rcx
+
+  cmp rcx, 0
+  ; je erro
 
   for:
-    cmp rcx, rbx
-    jb ciclo
-    jmp next
-
-  ciclo:
-    pop rdi
-    printVal rdi
+    mov rax, [rsp + 8*(rcx - 1)]
+    mov rdi, [rax] ; deref 
     call handle_addr
-    inc rcx
-    jmp for
+    
+  loop for
 
   next:
     ;; call display_table
@@ -42,19 +40,23 @@ fim:
   xor rdi, rdi
   syscall
 
-
 ; handles each address accordingly.
 handle_addr:
   xor r8, r8
   xor r9, r9
   xor r10, r10
 
+  rol di, 8
+
   mov r8, rdi             ; tag.
   mov r9, rdi ; index
   mov r10, rdi ; offset
 
   shr r8, 6 ; clears lowest 8 bits.
+
   and r9, 111100b ; leaves only 2nd-6th bits.
+  shr r9, 2
+
   and r10, 11b ; offset.  
 
   ret
