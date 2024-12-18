@@ -1,4 +1,8 @@
-section .text
+section .rodata
+  msg: db "Argumentos insuficientes!",10
+  len: equ $-msg 
+
+  section .text
 extern set_validation_bit
 extern set_tag
 extern get_data
@@ -8,6 +12,7 @@ extern get_tag
 global _start
 global handle_addr
 global get_data_func
+
 _start:    
   mov rbp, rsp
   xor rcx, rcx
@@ -18,6 +23,10 @@ _start:
 
   ; since prog name is discarded, must deduct one from argc.
   dec rbx
+
+  ; error in case not enough arguments are provided.
+  cmp rbx, 0
+  je error
 
   for:
     cmp rcx, rbx
@@ -64,6 +73,7 @@ _start:
           mov rdi, r9
           mov rsi, r8 
           call set_tag
+          jmp next
 
         next:
           call get_data_func
@@ -76,17 +86,25 @@ _start:
         jmp for
 
 fim:
-  call display_table
   mov rax, 60
   xor rdi, rdi
   syscall
 
+error:
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, msg
+  mov rdx, len
+  syscall
+
+  jmp fim
 
 ; this only exists to make code less repetitive.
 get_data_func:
   mov rdi, r9
   mov rsi, r10 
   call get_data
+  call display_table
   ret
 
 ; handles each address accordingly.
