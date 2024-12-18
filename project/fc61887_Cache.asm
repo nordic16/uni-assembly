@@ -64,7 +64,6 @@ _start:
           mov rdi, r9
           mov rsi, r8 
           call set_tag
-          jmp next
 
         next:
           call get_data_func
