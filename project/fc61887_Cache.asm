@@ -112,7 +112,7 @@ handle_addr:
   xor r10, r10
 
   ; little endian!!!
-  rol di, 8
+  ; rol di, 8
 
   mov r8, rdi ; tag.
   mov r9, rdi ; indice
